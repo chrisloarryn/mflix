@@ -53,6 +53,8 @@ export default class MoviesDAO {
     Remember that in MongoDB, the $in operator can be used with a list to
     match one or more values of a specific field.
     */
+    const query =
+      countries.length === 1 ? { $all: countries } : { $in: countries }
 
     let cursor
     try {
@@ -61,7 +63,15 @@ export default class MoviesDAO {
       // and _id. Do not put a limit in your own implementation, the limit
       // here is only included to avoid sending 46000 documents down the
       // wire.
-      cursor = await movies.find().limit(1)
+      cursor = await movies.find(
+        { countries: query },
+        {
+          projection: {
+            title: 1,
+          },
+        },
+      )
+      // .limit(2000)
     } catch (e) {
       console.error(`Unable to issue find command, ${e}`)
       return []
@@ -111,12 +121,11 @@ export default class MoviesDAO {
     Given an array of one or more genres, construct a query that searches
     MongoDB for movies with that genre.
     */
-
     const searchGenre = Array.isArray(genre) ? genre : genre.split(", ")
 
     // TODO Ticket: Text and Subfield Search
     // Construct a query that will search for the chosen genre.
-    const query = {}
+    const query = { genres: { $in: searchGenre } }
     const project = {}
     const sort = DEFAULT_SORT
 
@@ -196,6 +205,9 @@ export default class MoviesDAO {
       sortStage,
       // TODO Ticket: Faceted Search
       // Add the stages to queryPipeline in the correct order.
+      skipStage,
+      limitStage,
+      facetStage,
     ]
 
     try {
@@ -225,6 +237,8 @@ export default class MoviesDAO {
     page = 0,
     moviesPerPage = 20,
   } = {}) {
+    /* const skipStage = { $skip: moviesPerPage * page }
+    const limitStage = { $limit: moviesPerPage } */
     let queryParams = {}
     if (filters) {
       if ("text" in filters) {
@@ -259,7 +273,7 @@ export default class MoviesDAO {
 
     // TODO Ticket: Paging
     // Use the cursor to only return the movies that belong on the current page
-    const displayCursor = cursor.limit(moviesPerPage)
+    const displayCursor = cursor.limit(moviesPerPage).skip(moviesPerPage * page)
 
     try {
       const moviesList = await displayCursor.toArray()
@@ -296,9 +310,9 @@ export default class MoviesDAO {
       const pipeline = [
         {
           $match: {
-            _id: ObjectId(id)
-          }
-        }
+            _id: ObjectId(id),
+          },
+        },
       ]
       return await movies.aggregate(pipeline).next()
     } catch (e) {
