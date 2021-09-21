@@ -167,18 +167,22 @@ export default class UsersDAO {
     try {
       /**
       Ticket: User Preferences
-
+      
       Update the "preferences" field in the corresponding user's document to
       reflect the new information in preferences.
       */
+      const userFound = await users.findOne({ email })
+      if (!userFound) {
+        return { error: "No user found with that email" }
+      }
 
       preferences = preferences || {}
 
       // TODO Ticket: User Preferences
       // Use the data in "preferences" to update the user's preferences.
       const updateResponse = await users.updateOne(
-        { someField: "someValue" },
-        { $set: { someOtherField: "someOtherValue" } },
+        { email },
+        { $set: { preferences } },
       )
 
       if (updateResponse.matchedCount === 0) {
