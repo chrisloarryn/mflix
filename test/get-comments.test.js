@@ -20,6 +20,9 @@ describe("Get Comments", () => {
       const movie = await MoviesDAO.getMovieByID(id)
       const comments = movie.comments
       const sortedComments = comments.slice()
+      console.log("====================================")
+      console.log(sortedComments)
+      console.log("====================================")
       sortedComments.sort((a, b) => b.date.getTime() - a.date.getTime())
 
       for (let i = 0; i < Math.min(10, comments.length); i++) {

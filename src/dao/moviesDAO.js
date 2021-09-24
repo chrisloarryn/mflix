@@ -314,7 +314,21 @@ export default class MoviesDAO {
           },
         },
       ]
-      return await movies.aggregate(pipeline).next()
+      const lookup = {
+        from: "comments",
+        let: { id: "$_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$movie_id", "$$id"] } } },
+          {
+            $sort: { date: -1 },
+          },
+        ],
+        as: "comments",
+      }
+      return await movies
+        .aggregate(pipeline)
+        .lookup(lookup)
+        .next()
     } catch (e) {
       /**
       Ticket: Error Handling
