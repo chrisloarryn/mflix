@@ -10,8 +10,10 @@ export default class MoviesDAO {
       return
     }
     try {
-      mflix = await conn.db(process.env.MFLIX_NS)
-      movies = await conn.db(process.env.MFLIX_NS).collection("movies")
+      mflix = await conn.db(process.env.MFLIX_NS, { useUnifiedTopology: true })
+      movies = await conn
+        .db(process.env.MFLIX_NS, { useUnifiedTopology: true })
+        .collection("movies")
       this.movies = movies // this is only for testing
     } catch (e) {
       console.error(

@@ -12,8 +12,12 @@ export default class UsersDAO {
       return
     }
     try {
-      users = await conn.db(process.env.MFLIX_NS).collection("users")
-      sessions = await conn.db(process.env.MFLIX_NS).collection("sessions")
+      users = await conn
+        .db(process.env.MFLIX_NS, { useUnifiedTopology: true })
+        .collection("users")
+      sessions = await conn
+        .db(process.env.MFLIX_NS, { useUnifiedTopology: true })
+        .collection("sessions")
     } catch (e) {
       console.error(`Unable to establish collection handles in userDAO: ${e}`)
     }

@@ -8,7 +8,9 @@ export default class CommentsDAO {
       return
     }
     try {
-      comments = await conn.db(process.env.MFLIX_NS).collection("comments")
+      comments = await conn
+        .db(process.env.MFLIX_NS, { useUnifiedTopology: true })
+        .collection("comments")
     } catch (e) {
       console.error(`Unable to establish collection handles in userDAO: ${e}`)
     }
@@ -44,10 +46,18 @@ export default class CommentsDAO {
   static async addComment(movieId, user, comment, date) {
     try {
       // TODO Ticket: Create/Update Comments
+      const { name, email } = user
       // Construct the comment document to be inserted into MongoDB.
-      const commentDoc = { someField: "someValue" }
+      const commentDoc = {
+        name,
+        email,
+        movie_id: movieId,
+        comment,
+        date,
+      }
 
-      return await comments.insertOne(commentDoc)
+      const insertedComment = await comments.insertOne(commentDoc)
+      return await insertedComment
     } catch (e) {
       console.error(`Unable to post comment: ${e}`)
       return { error: e }
@@ -70,8 +80,8 @@ export default class CommentsDAO {
       // Use the commentId and userEmail to select the proper comment, then
       // update the "text" and "date" fields of the selected comment.
       const updateResponse = await comments.updateOne(
-        { someField: "someValue" },
-        { $set: { someOtherField: "someOtherValue" } },
+        { _id: new ObjectId(commentId) },
+        { $set: { email: userEmail, text, date: date } },
       )
 
       return updateResponse
