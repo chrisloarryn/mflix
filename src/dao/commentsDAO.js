@@ -51,12 +51,13 @@ export default class CommentsDAO {
       const commentDoc = {
         name,
         email,
-        movie_id: movieId,
-        comment,
+        movie_id: new ObjectId(movieId),
+        text: comment,
         date,
       }
 
       const insertedComment = await comments.insertOne(commentDoc)
+
       return await insertedComment
     } catch (e) {
       console.error(`Unable to post comment: ${e}`)
@@ -80,7 +81,7 @@ export default class CommentsDAO {
       // Use the commentId and userEmail to select the proper comment, then
       // update the "text" and "date" fields of the selected comment.
       const updateResponse = await comments.updateOne(
-        { _id: new ObjectId(commentId) },
+        { _id: new ObjectId(commentId), email: userEmail },
         { $set: { email: userEmail, text, date: date } },
       )
 
@@ -106,6 +107,7 @@ export default class CommentsDAO {
       // Use the userEmail and commentId to delete the proper comment.
       const deleteResponse = await comments.deleteOne({
         _id: ObjectId(commentId),
+        email: userEmail,
       })
 
       return deleteResponse
@@ -126,7 +128,20 @@ export default class CommentsDAO {
     try {
       // TODO Ticket: User Report
       // Return the 20 users who have commented the most on MFlix.
-      const pipeline = []
+      const pipeline = [
+        {
+          $group: {
+            _id: "$email",
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: {
+            count: -1,
+          },
+        },
+        { $limit: 20 },
+      ]
 
       // TODO Ticket: User Report
       // Use a more durable Read Concern here to make sure this data is not stale.
@@ -136,7 +151,8 @@ export default class CommentsDAO {
         readConcern,
       })
 
-      return await aggregateResult.toArray()
+      const res = await aggregateResult.toArray()
+      return res
     } catch (e) {
       console.error(`Unable to retrieve most active commenters: ${e}`)
       return { error: e }

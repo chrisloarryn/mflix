@@ -3,7 +3,7 @@ import { ObjectId } from "mongodb"
 
 describe("Migration", () => {
   beforeAll(async () => {
-    await MoviesDAO.injectDB(global.mflixClient)
+    await MoviesDAO.injectDB(global.mflixClient, { useUnifiedTopology: true })
   })
 
   test("migration", async () => {

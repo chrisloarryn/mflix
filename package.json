@@ -10,6 +10,7 @@
     "test:send:command": "npm test -t TICKET_TEST_NAME",
     "changestream:update": "node test/lessons/change-updates.js",
     "changestream:insert": "node test/lessons/change-insert.js",
+    "migrate": "node src/migrations/movie-last-updated-migration.js",
     "test:db:connection": "npm test -t db-connection"
   },
   "husky": {
