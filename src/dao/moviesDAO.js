@@ -10,7 +10,9 @@ export default class MoviesDAO {
       return
     }
     try {
-      mflix = await conn.db(process.env.MFLIX_NS, { useUnifiedTopology: true })
+      mflix = await conn.db(process.env.MFLIX_NS, {
+        useUnifiedTopology: true,
+      })
       movies = await conn
         .db(process.env.MFLIX_NS, { useUnifiedTopology: true })
         .collection("movies")
@@ -30,7 +32,8 @@ export default class MoviesDAO {
   static async getConfiguration() {
     const roleInfo = await mflix.command({ connectionStatus: 1 })
     const authInfo = roleInfo.authInfo.authenticatedUserRoles[0]
-    const { poolSize, wtimeout } = movies.s.db.serverConfig.s.options
+    const { poolSize, wTimeoutMS } = movies.s.db.serverConfig.s.options
+    const wtimeout = wTimeoutMS
     let response = {
       poolSize,
       wtimeout,
@@ -151,7 +154,9 @@ export default class MoviesDAO {
       throw new Error("Must specify cast members to filter by.")
     }
     const matchStage = { $match: filters }
-    const sortStage = { $sort: { "tomatoes.viewer.numReviews": -1 } }
+    const sortStage = {
+      $sort: { "tomatoes.viewer.numReviews": -1 },
+    }
     const countingPipeline = [matchStage, sortStage, { $count: "count" }]
     const skipStage = { $skip: moviesPerPage * page }
     const limitStage = { $limit: moviesPerPage }
@@ -220,7 +225,9 @@ export default class MoviesDAO {
         ...count,
       }
     } catch (e) {
-      return { error: "Results too large, be more restrictive in filter" }
+      return {
+        error: "Results too large, be more restrictive in filter",
+      }
     }
   }
 
@@ -342,7 +349,9 @@ export default class MoviesDAO {
       // TODO Ticket: Error Handling
       // Catch the InvalidId error by string matching, and then handle it.
       console.error(`Something went wrong in getMovieByID: ${e}`)
-      throw e
+      // eslint-disable-next-line no-throw-literal
+      // throw `Something went wrong in getMovieByID: ${e}`
+      return null
     }
   }
 }

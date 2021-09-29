@@ -24,7 +24,7 @@ describe("Paging", () => {
 
     // check some of the movies on the second page
     const firstMovie = firstPage[0]
-    const twentiethMovie = firstPage.slice(-1).pop()
+    const twentiethMovie = firstPage.slice(-2)
     expect(firstMovie.title).toEqual(
       "Star Wars: Episode III - Revenge of the Sith",
     )
@@ -108,7 +108,7 @@ describe("Paging", () => {
 
     // check some of the movies on the second page
     const firstMovie = firstPage[0]
-    const twentiethMovie = [...firstPage].slice(-2)
+    const twentiethMovie = firstPage.slice(-2)
     expect(firstMovie.title).toEqual("Countdown")
     expect(twentiethMovie.title).toEqual("The Front Line")
 
